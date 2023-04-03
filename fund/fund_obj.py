@@ -1,5 +1,6 @@
 from fund.fund_base import FundBase
 
+
 class F110035(FundBase):
     def buy_fee_rule(self, current):
         fee = 0.0
@@ -48,3 +49,25 @@ class F007230(FundBase):
             fee = 0.0
         return fee
 
+class F164206(FundBase):
+    def buy_fee_rule(self, current):
+        fee = 0.0
+        return fee
+
+    def sell_fee_rule(self, current, gap):
+        fee = 0.0
+        if (gap < 0):
+            fee = 0.0
+        elif (gap < 7):
+            fee = 1.5e-2 * current
+        elif (gap < 90):
+            fee = 0.1e-2 * current
+        else:
+            fee = 0.0
+        return fee
+
+FundDict = {
+#    '110035':F110035(),
+    '007230':F007230(),
+#    '164206':F164206(),
+}
