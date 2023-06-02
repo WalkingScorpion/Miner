@@ -3,21 +3,20 @@ import os
 from data_fetcher import em_fetcher as emf
 from fund import fund_base as fb
 from fund import fund_obj as fo
-from invest_stategy import easy_strategy as es
+from invest_stategy import continue_signal_strategy as css
+from invest_stategy import acc_signal_strategy as ass
 from matrix import liner_matrix as lm
 
 if __name__=="__main__":
-    #code = '007230'
-    #code = '110035'
-    #code = '164206'
-    matrix_num = 5
+    matrix_num = 3
     init = 50000
     df_dict = {}
     st_dict = {
-        's4' : es.EasyStrategy(init, 0.2, 4),
-        's5' : es.EasyStrategy(init, 0.2, 5),
-        's6' : es.EasyStrategy(init, 0.2, 6),
-        's7' : es.EasyStrategy(init, 0.2, 7),
+        's3' : css.ContinueSignalStrategy(init, 0.2, 3),
+        's4' : css.ContinueSignalStrategy(init, 0.2, 4),
+        's5' : css.ContinueSignalStrategy(init, 0.2, 5),
+        's6' : css.ContinueSignalStrategy(init, 0.2, 6),
+        's7' : css.ContinueSignalStrategy(init, 0.2, 7),
     }
     for code in fo.FundDict.keys():
         f = emf.EastMoneyFetcher(code, "2018-01-01", "2023-03-30")

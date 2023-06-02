@@ -1,7 +1,7 @@
 from datetime import datetime
 from fund import fund_base as fb
 
-class EasyStrategy(object):
+class AccSignalStrategy(object):
     def __init__(self, init, coe = 0.2, thres = 5):
         self.fm = None
         self.name = None
@@ -29,9 +29,9 @@ class EasyStrategy(object):
                 today = df.iloc[row]
                 if today['ratio'] < 0.0:
                     b_count = b_count + 1
-                    s_count = 0;
+                    s_count = s_count - 1 if s_count > 0 else s_count
                 else:
-                    b_count = 0;
+                    b_count = b_count - 1 if b_count > 0 else b_count
                     s_count = s_count + 1
                 nav = today['acc_nav']
                 now_share = fund.get_share()
