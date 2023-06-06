@@ -22,9 +22,9 @@ class RtSnowballFetcher(object):
         self.code = ','.join(new)
 
     def build_dataframe(self, jstr):
-        col_name = ['ts_code', 'rt_timestamp', 'rt_open', 'rt_high',
-            'rt_low', 'rt_current', 'rt_pre_close', 'rt_change', 'rt_pct_chg',
-            'rt_vol', 'rt_amount']
+        col_name = ['ts_code', 'trade_date', 'open', 'high',
+            'low', 'close', 'pre_close', 'change', 'pct_chg',
+            'vol', 'amount']
         jdat = json.loads(jstr)
         timestamp_list = []
         code_list = []

@@ -30,7 +30,6 @@ class TushareFetcher(object):
         return df
 
     def fetch_data(self):
-        ts.set_token('d78d8913b060771bebe19279df50a929e5f6fc81a48c179bf02a8c88')
         l = []
         code_list = self.code.split(",")
         for c in code_list:
