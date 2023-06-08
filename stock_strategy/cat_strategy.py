@@ -10,6 +10,7 @@ class CatStrategy(object):
 
     def run_strategy(self):
         his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
+        td = his['trade_date'][0]
         op = his['open'][0]
         cl = his['close'][0]
         hi = his['high'][0]
@@ -40,9 +41,12 @@ class CatStrategy(object):
             return False, "[Kx decline. k5 %lf->%lf k10 %lf->%lf k20 %lf->%lf]" % (k5[1], k5[0], k10[1], k10[0], k20[1], k20[0])
         if box_pct < 0.025 or box_pct > 0.055:
             return False, "[box profile unexcepted. box percentt %lf]" % box_pct
-        if (hi - op) / op < 0.096:
+        if (hi - op) / op > 0.096:
             return False, "[Highest price is too high. highest %lf open %lf]" % (hi, op)
-        if (his['vol'][0] < his['vol'][1] or his['vol'][1] < his['vol'][2] or
+        if (
+            #his['vol'][0] < his['vol'][1] or
+            his['vol'][1] < his['vol'][2] or
             his['vol'][2] < his['vol'][3]):
             return False, "[Volume not continue increase]"
-        return True, "[Congratulation!]"
+        info = '[%s] [%lf]' % (td, cl)
+        return True, info
