@@ -15,7 +15,6 @@ class RtSnowballFetcher(object):
     }
 
     def __init__(self, code):
-        ball.set_token('xq_a_token=71c23ae269a6dc16cd704cdce4529b613425cdd2;')
         origin = code.split(',')
         new = []
         for c in origin:
@@ -82,7 +81,7 @@ class RtSnowballFetcher(object):
         return df
 
     def fetch_data(self):
-        millis = (int(time.time())) * 1000
+        ball.set_token('xq_a_token=71c23ae269a6dc16cd704cdce4529b613425cdd2;')
         dat = ball.quotec(self.code)
         self.df = self.build_dataframe(dat)
 

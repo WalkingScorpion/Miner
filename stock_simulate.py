@@ -10,8 +10,6 @@ import tushare as ts
 
 show_url = "http://stockpage.10jqka.com.cn/"
 send_url = "http://www.pushplus.plus/send"
-#token=b0b164534ed046bcbd0719fa93954d54&title=“猫周期”量化 选股推送"
-#&content=XXX&template=html&topic=XXX"
 
 def handle(start, end, code_list, tuf, f_info_l):
     local = code_list[start : end]
@@ -77,5 +75,4 @@ if __name__=="__main__":
       "topic" : "1",
       "template" : "html",
     }
-    #requests.get(url = send_url, params = params)
-#xq_a_token=71c23ae269a6dc16cd704cdce4529b613425cdd2
+    requests.get(url = send_url, params = params)
