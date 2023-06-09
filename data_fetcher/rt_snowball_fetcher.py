@@ -4,6 +4,7 @@ import datetime
 import time
 import sys
 import pandas as pd
+import pysnowball as ball
 
 class RtSnowballFetcher(object):
     url = 'https://stock.xueqiu.com/v5/stock/realtime/quotec.json'
@@ -14,6 +15,7 @@ class RtSnowballFetcher(object):
     }
 
     def __init__(self, code):
+        ball.set_token('xq_a_token=71c23ae269a6dc16cd704cdce4529b613425cdd2;')
         origin = code.split(',')
         new = []
         for c in origin:
@@ -26,11 +28,10 @@ class RtSnowballFetcher(object):
         r = self.df[self.df['ts_code'] == code].reset_index(drop=True)
         return r
 
-    def build_dataframe(self, jstr):
+    def build_dataframe(self, jdat):
         col_name = ['ts_code', 'trade_date', 'open', 'high',
             'low', 'close', 'pre_close', 'change', 'pct_chg',
             'vol', 'amount']
-        jdat = json.loads(jstr)
         timestamp_list = []
         code_list = []
         current_list = []
@@ -82,11 +83,8 @@ class RtSnowballFetcher(object):
 
     def fetch_data(self):
         millis = (int(time.time())) * 1000
-        params = {
-          "symbol" : self.code, #"SH601168"
-        }
-        response = requests.get(url = RtSnowballFetcher.url, params = params, headers = RtSnowballFetcher.header)
-        self.df = self.build_dataframe(response.text)
+        dat = ball.quotec(self.code)
+        self.df = self.build_dataframe(dat)
 
 if __name__=="__main__":
     f = RtSnowballFetcher(sys.argv[1])
