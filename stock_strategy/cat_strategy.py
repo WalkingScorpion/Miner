@@ -9,7 +9,12 @@ class CatStrategy(object):
         self.realtime = realtime
 
     def run_strategy(self):
-        his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
+        rt_date = self.realtime['trade_date'][0].split()[0]
+        his_date = self.history['trade_date'][0]
+        if (not rt_date == str(his_date)):
+            his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
+        else:
+            his = self.history
         td = his['trade_date'][0]
         op = his['open'][0]
         cl = his['close'][0]

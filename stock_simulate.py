@@ -6,7 +6,6 @@ import os
 from data_fetcher import rt_snowball_fetcher as rsf
 from data_fetcher import tushare_fetcher as tuf
 from stock_strategy import cat_strategy as cs
-from utils import stock_utils
 import tushare as ts
 
 show_url = "http://stockpage.10jqka.com.cn/"
@@ -14,18 +13,18 @@ send_url = "http://www.pushplus.plus/send"
 #token=b0b164534ed046bcbd0719fa93954d54&title=“猫周期”量化 选股推送"
 #&content=XXX&template=html&topic=XXX"
 
-def handle(start, end, code_list, df_his, f_info_l):
+def handle(start, end, code_list, tuf, f_info_l):
     local = code_list[start : end]
     begin = datetime.datetime.now()
     stp = begin.strftime("%Y-%m-%d %H:%M:%S")
     code = ','.join(local)
     #print('---- Batch [%d, %d) %s ----' % (start, end, stp))
     rt = rsf.RtSnowballFetcher(code)
-    df_rt = rt.fetch_data()
+    rt.fetch_data()
     count = 0
     for c in local:
-        h = stock_utils.extract_from_dflist(df_his, c)
-        r = stock_utils.extract(df_rt, c)
+        h = tuf.extract_snapshot(c)
+        r = rt.extract_snapshot(c)
         s = cs.CatStrategy(h, r)
         mark, reason = s.run_strategy()
         if mark:
@@ -40,12 +39,14 @@ def handle(start, end, code_list, df_his, f_info_l):
 
 
 if __name__=="__main__":
-    #ts.set_token('d78d8913b060771bebe19279df50a929e5f6fc81a48c179bf02a8c88')
-    ts.set_token('d2ff623db1a7255defc5b597a2b530c9d671505c49e5e49477cc9ccb')
-    df_his, st = stock_utils.fetch_stock_info(days=29, offset=1)
+    tuf = tuf.TushareFetcher()
+    tuf.fetch_data(offset=1)
+    df_his = tuf.dfl
     if (len(sys.argv) > 1):
         st = sys.argv[1]
-    code_list = st.split(",")
+        code_list = st.split(",")
+    else:
+        code_list = tuf.code_list
     #while
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- Begin %s ----' % stp
@@ -60,7 +61,7 @@ if __name__=="__main__":
     while i < len(code_list):
         start = i
         end = i + batch if i + batch < len(code_list) else  len(code_list)
-        handle(start, end, code_list, df_his, f_info_l)
+        handle(start, end, code_list, tuf, f_info_l)
         i = i + batch
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- All Done %s ----' % stp
@@ -76,4 +77,4 @@ if __name__=="__main__":
       "topic" : "1",
       "template" : "html",
     }
-    response = requests.get(url = send_url, params = params)
+    #requests.get(url = send_url, params = params)

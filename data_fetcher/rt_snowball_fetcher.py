@@ -20,6 +20,11 @@ class RtSnowballFetcher(object):
             p = c.split('.')
             new.append(p[1] + p[0])
         self.code = ','.join(new)
+        self.df = None
+
+    def extract_snapshot(self, code):
+        r = self.df[self.df['ts_code'] == code].reset_index(drop=True)
+        return r
 
     def build_dataframe(self, jstr):
         col_name = ['ts_code', 'trade_date', 'open', 'high',
@@ -81,8 +86,7 @@ class RtSnowballFetcher(object):
           "symbol" : self.code, #"SH601168"
         }
         response = requests.get(url = RtSnowballFetcher.url, params = params, headers = RtSnowballFetcher.header)
-        df = self.build_dataframe(response.text)
-        return (df)
+        self.df = self.build_dataframe(response.text)
 
 if __name__=="__main__":
     f = RtSnowballFetcher(sys.argv[1])
