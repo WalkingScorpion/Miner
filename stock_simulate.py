@@ -8,7 +8,7 @@ from stock_strategy import cat_strategy as cs
 from utils import stock_utils
 import tushare as ts
 
-def handle(start, end, code_list, df_his):
+def handle(start, end, code_list, df_his, f_info_l):
     local = code_list[start : end]
     begin = datetime.datetime.now()
     stp = begin.strftime("%Y-%m-%d %H:%M:%S")
@@ -23,6 +23,7 @@ def handle(start, end, code_list, df_his):
         s = cs.CatStrategy(h, r)
         mark, reason = s.run_strategy()
         if mark:
+            f_info_l[0] = f_info_l[0] + c + " " + reason + '\n'
             print(c + " " + str(mark) + " " + reason)
     sink = datetime.datetime.now()
     gap = (sink - begin).seconds 
@@ -38,14 +39,21 @@ if __name__=="__main__":
     code_list = st.split(",")
     while True:
         stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print('---- Begin %s ----' % stp)
+        tmp = '---- Begin %s ----' % stp
+        f_info = ""
+        f_info_l = [f_info]
+        print(tmp)
+        f_info_l[0] = f_info_l[0] + tmp + '\n'
         i = 0
         batch = 150
         while i < len(code_list):
             start = i
             end = i + batch if i + batch < len(code_list) else  len(code_list)
-            handle(start, end, code_list, df_his)
+            handle(start, end, code_list, df_his, f_info_l)
             i = i + batch
         stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print('---- All Done %s ----' % stp)
-    
+        tmp = '---- All Done %s ----' % stp
+        print(tmp)
+        f_info_l[0] = f_info_l[0] + tmp + '\n'
+        with open('newdata', 'w+') as f:
+            f.write(f_info_l[0])
