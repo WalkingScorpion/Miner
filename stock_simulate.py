@@ -1,4 +1,5 @@
 import sys
+import requests
 import time
 import datetime
 import os
@@ -9,6 +10,9 @@ from utils import stock_utils
 import tushare as ts
 
 show_url = "http://stockpage.10jqka.com.cn/"
+send_url = "http://www.pushplus.plus/send"
+#token=b0b164534ed046bcbd0719fa93954d54&title=“猫周期”量化 选股推送"
+#&content=XXX&template=html&topic=XXX"
 
 def handle(start, end, code_list, df_his, f_info_l):
     local = code_list[start : end]
@@ -27,6 +31,8 @@ def handle(start, end, code_list, df_his, f_info_l):
         if mark:
             f_info_l[0] += "<a href=\"" + show_url + c.split('.')[0] + "\">" + \
               c + "</a> " + reason + ' <br>\n'
+            f_info_l[1] += "<a href=\"" + show_url + c.split('.')[0] + "\">" + \
+              c + "</a> " + reason + ' <br>'
             print(c + " " + str(mark) + " " + reason)
     sink = datetime.datetime.now()
     gap = (sink - begin).seconds 
@@ -44,9 +50,11 @@ if __name__=="__main__":
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- Begin %s ----' % stp
     f_info = ""
-    f_info_l = [f_info]
+    send_info = ""
+    f_info_l = [f_info, send_info]
     print(tmp)
-    f_info_l[0] = f_info_l[0] + tmp + '<br>\n'
+    f_info_l[0] += tmp + '<br>\n'
+    f_info_l[1] += tmp + '<br>'
     i = 0
     batch = 150
     while i < len(code_list):
@@ -57,6 +65,15 @@ if __name__=="__main__":
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- All Done %s ----' % stp
     print(tmp)
-    f_info_l[0] = f_info_l[0] + tmp + '<br>\n'
+    f_info_l[0] += tmp + '<br>\n'
+    f_info_l[1] += tmp + '<br>'
     with open('index.html', 'w+') as f:
         f.write(f_info_l[0])
+    params = {
+      "token" : "b0b164534ed046bcbd0719fa93954d54",
+      "title" : "“猫周期”量化 选股推送",
+      "content" : f_info_l[1],
+      "topic" : "1",
+      "template" : "html",
+    }
+    response = requests.get(url = send_url, params = params)
