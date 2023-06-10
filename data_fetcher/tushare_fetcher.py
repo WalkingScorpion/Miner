@@ -32,7 +32,7 @@ class TushareFetcher(object):
         r = pd.concat(l).reset_index(drop=True)
         return r
 
-    def fetch_data(self, dir_path="data/stock/", days=29, offset=0,
+    def fetch_data(self, dir_path="data/stock/", days=30, offset=0,
         date=datetime.datetime.now()):
         o = datetime.timedelta(days=offset)
         d = datetime.timedelta(days=1)

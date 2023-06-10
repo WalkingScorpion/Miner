@@ -8,13 +8,7 @@ class CatStrategy(object):
         self.history = history
         self.realtime = realtime
 
-    def run_strategy(self):
-        rt_date = self.realtime['trade_date'][0].split()[0]
-        his_date = self.history['trade_date'][0]
-        if (not rt_date == str(his_date)):
-            his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
-        else:
-            his = self.history
+    def strategy_level0(self, his):
         td = his['trade_date'][0]
         op = his['open'][0]
         cl = his['close'][0]
@@ -49,9 +43,36 @@ class CatStrategy(object):
         if (hi - op) / op > 0.096:
             return False, "[Highest price is too high. highest %lf open %lf]" % (hi, op)
         if (
-            #his['vol'][0] < his['vol'][1] or
             his['vol'][1] < his['vol'][2] or
             his['vol'][2] < his['vol'][3]):
             return False, "[Volume not continue increase]"
         info = '[%s] [%lf]' % (td, cl)
         return True, info
+        
+    def strategy_tor(self, his):
+        tor = his['tor'][0]
+        if (tor < 5 or tor > 10):
+            return False
+        return True
+
+    def strategy_evol(self, his):
+        ts = his['trade_date'][0].split()[1]
+        sec = stock_utils.get_trade_second(ts)
+        e_vol = 1.0 * his['vol'][0]  / sec * 3600 * 4
+        if (e_vol < his['vol'][1]):
+            return False
+        return True
+
+    def run_strategy(self):
+        rt_date = self.realtime['trade_date'][0].split()[0]
+        his_date = self.history['trade_date'][0]
+        if  (rt_date == str(his_date)):
+            self.history = self.history.drop([0])
+        his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
+        match_level0, info0 = self.strategy_level0(his)
+        if match_level0:
+            if self.strategy_tor(his):
+                info0 += " [tor matched]"
+            if self.strategy_evol(his):
+                info0 += " [evol matched]"
+        return match_level0, info0

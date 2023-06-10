@@ -30,7 +30,7 @@ class RtSnowballFetcher(object):
     def build_dataframe(self, jdat):
         col_name = ['ts_code', 'trade_date', 'open', 'high',
             'low', 'close', 'pre_close', 'change', 'pct_chg',
-            'vol', 'amount']
+            'vol', 'amount', 'tor']
         timestamp_list = []
         code_list = []
         current_list = []
@@ -42,6 +42,7 @@ class RtSnowballFetcher(object):
         open_list = []
         high_list = []
         low_list = []
+        tor_list = []
         for n in jdat['data']:
             chg = n['chg']
             if chg == None:
@@ -58,12 +59,13 @@ class RtSnowballFetcher(object):
             current_list.append(cur)
             percent_list.append(n['percent'])
             change_list.append(chg)
-            pre_close_list.append(1.0 * (int(cur * 100) - int(chg * 100)) / 100)
-            vol_list.append(n['volume'])
-            amount_list.append(n['amount'])
+            pre_close_list.append(n['last_close'])
+            vol_list.append(1.0 * n['volume'] / 100) # trasfer to tushare standard
+            amount_list.append(1.0 * n['amount'] / 1000) # trasfer to tushare standard
             open_list.append(n['open'])
             high_list.append(n['high'])
             low_list.append(n['low'])
+            tor_list.append(n['turnover_rate'])
         data = []
         data.append(code_list)
         data.append(timestamp_list)
@@ -76,6 +78,7 @@ class RtSnowballFetcher(object):
         data.append(percent_list)
         data.append(vol_list)
         data.append(amount_list)
+        data.append(tor_list)
         df = pd.DataFrame(data).T
         df.columns = col_name
         return df
