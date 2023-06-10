@@ -72,7 +72,7 @@ class CatStrategy(object):
         match_level0, info0 = self.strategy_level0(his)
         if match_level0:
             if self.strategy_tor(his):
-                info0 += " [tor matched]"
+                info0 += " [tor]"
             if self.strategy_evol(his):
-                info0 += " [evol matched]"
+                info0 += " [evol]"
         return match_level0, info0
