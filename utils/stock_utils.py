@@ -34,6 +34,17 @@ def get_trade_second(ts):
         g -= d
     return int(g.total_seconds())
 
+def get_volume_ratio(df, window = 5):
+    ts = df['trade_date'][0].split()[1]
+    evol = df['vol'][0] / get_trade_second(ts)
+    i = 0
+    s = 0
+    while (i < window):
+        s += df['vol'][i + 1]
+        i += 1
+    mvol = s / window / 14400
+    return evol / mvol
+
 if __name__=="__main__":
     print(get_trade_second("09:20:30"), 0)
     print(get_trade_second("09:30:30"), 30)

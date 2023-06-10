@@ -51,17 +51,18 @@ class CatStrategy(object):
         
     def strategy_tor(self, his):
         tor = his['tor'][0]
-        if (tor < 5 or tor > 10):
-            return False
-        return True
+        return 5 < tor < 10
 
     def strategy_evol(self, his):
         ts = his['trade_date'][0].split()[1]
         sec = stock_utils.get_trade_second(ts)
         e_vol = 1.0 * his['vol'][0]  / sec * 3600 * 4
-        if (e_vol < his['vol'][1]):
-            return False
-        return True
+        return e_vol > his['vol'][1]
+
+    def strategy_vr(self, his):
+        vr = stock_utils.get_volume_ratio(his)
+        print(vr)
+        return vr > 1
 
     def run_strategy(self):
         rt_date = self.realtime['trade_date'][0].split()[0]
@@ -75,4 +76,6 @@ class CatStrategy(object):
                 info0 += " [tor]"
             if self.strategy_evol(his):
                 info0 += " [evol]"
+            if self.strategy_vr(his):
+                info0 += " [vr]"
         return match_level0, info0
