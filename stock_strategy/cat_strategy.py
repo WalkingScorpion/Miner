@@ -61,7 +61,6 @@ class CatStrategy(object):
 
     def strategy_vr(self, his):
         vr = stock_utils.get_volume_ratio(his)
-        print(vr)
         return vr > 1
 
     def run_strategy(self):
