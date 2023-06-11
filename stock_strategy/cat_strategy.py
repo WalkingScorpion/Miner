@@ -46,7 +46,7 @@ class CatStrategy(object):
             his['vol'][1] < his['vol'][2] or
             his['vol'][2] < his['vol'][3]):
             return False, "[Volume not continue increase]"
-        info = '[%s] [%lf]' % (td, cl)
+        info = '| %s | %lf |' % (td, cl)
         return True, info
         
     def strategy_tor(self, his):
@@ -63,7 +63,35 @@ class CatStrategy(object):
         vr = stock_utils.get_volume_ratio(his)
         return vr > 1
 
-    def run_strategy(self):
+    def sell_strategy(self, buy_date, price, period=3):
+        rt_date = self.realtime['trade_date'][0].split()[0]
+        his_date = self.history['trade_date'][0]
+        if  (rt_date == str(his_date)):
+            self.history = self.history.drop([0])
+        his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
+        i = 0
+        drop_list = []
+        while i < his.shape[0]:
+            n = int(str(his['trade_date'][i]).split()[0])
+            b = int(buy_date)
+            if n <= b:
+                drop_list.append(i)
+            i += 1
+        his = his.drop(drop_list)
+        info = his['ts_code'][0]
+        if his.shape[0] < period:
+            return "Not Ready"
+        sell = his['high'][0]
+        i = 1
+        while i < his.shape[0]:
+            n = int(str(his['trade_date'][i]).split()[0])
+            if his['high'][i] > sell:
+                return " %s | %f | %f" % (n, sell, sell / price * 100 - 100)
+            i += 1
+        return "Failed"
+        
+
+    def buy_strategy(self):
         rt_date = self.realtime['trade_date'][0].split()[0]
         his_date = self.history['trade_date'][0]
         if  (rt_date == str(his_date)):

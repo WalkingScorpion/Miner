@@ -24,7 +24,7 @@ class RtSnowballFetcher(object):
         self.df = None
 
     def extract_snapshot(self, code):
-        r = self.df[self.df['ts_code'] == code].reset_index(drop=True)
+        r = self.df[self.df.ts_code == code].reset_index(drop=True)
         return r
 
     def build_dataframe(self, jdat):

@@ -16,7 +16,6 @@ def handle(start, end, code_list, tuf, f_info_l):
     begin = datetime.datetime.now()
     stp = begin.strftime("%Y-%m-%d %H:%M:%S")
     code = ','.join(local)
-    #print('---- Batch [%d, %d) %s ----' % (start, end, stp))
     rt = rsf.RtSnowballFetcher(code)
     rt.fetch_data()
     count = 0
@@ -24,22 +23,25 @@ def handle(start, end, code_list, tuf, f_info_l):
         h = tuf.extract_snapshot(c)
         r = rt.extract_snapshot(c)
         s = cs.CatStrategy(h, r)
-        mark, reason = s.run_strategy()
+        mark, reason = s.buy_strategy()
         if mark:
-            f_info_l[0] += "<a href=\"" + show_url + c.split('.')[0] + "\">" + \
-              c + "</a> " + reason + ' <br>\n'
-            f_info_l[1] += "<a href=\"" + show_url + c.split('.')[0] + "\">" + \
-              c + "</a> " + reason + ' <br>'
-            print(c + " " + str(mark) + " " + reason)
+            tmp = "<a href=\"" + show_url + c.split('.')[0] + "\">" + \
+                c + "</a> " + reason + ' <br>'
+            f_info_l[0] += tmp + '\n'
+            f_info_l[1] += tmp
+            tmp = c + " " + reason
+            print(tmp)
+            f_info_l[2] += tmp + '\n'
     sink = datetime.datetime.now()
     gap = (sink - begin).seconds 
-    #print('---- Batch time %d s ----' % gap)
-
 
 if __name__=="__main__":
     tuf = tuf.TushareFetcher()
     tuf.fetch_data(offset=1)
     df_his = tuf.dfl
+    rt = rsf.RtSnowballFetcher('601168.SH')
+    rt.fetch_data()
+    date = rt.df['trade_date'][0].split()[0]
     if (len(sys.argv) > 1):
         st = sys.argv[1]
         code_list = st.split(",")
@@ -50,7 +52,8 @@ if __name__=="__main__":
     tmp = '---- Begin %s ----' % stp
     f_info = ""
     send_info = ""
-    f_info_l = [f_info, send_info]
+    trace_info = ""
+    f_info_l = [f_info, send_info, trace_info]
     print(tmp)
     f_info_l[0] += tmp + '<br>\n'
     f_info_l[1] += tmp + '<br>'
@@ -68,6 +71,8 @@ if __name__=="__main__":
     f_info_l[1] += tmp + '<br>'
     with open('index.html', 'w+') as f:
         f.write(f_info_l[0])
+    with open('data/mock_trade/' + date, 'w+') as f:
+        f.write(f_info_l[2])
     params = {
       "token" : "b0b164534ed046bcbd0719fa93954d54",
       "title" : "“猫周期”量化 选股推送",

@@ -27,13 +27,13 @@ class TushareFetcher(object):
     def extract_snapshot(self, code):
         l = []
         for df in self.dfl:
-            r = df[df['ts_code'] == code]
+            r = df[df.ts_code == code]
             l.append(r)
         r = pd.concat(l).reset_index(drop=True)
         return r
 
-    def fetch_data(self, dir_path="data/stock/", days=30, offset=0,
-        date=datetime.datetime.now()):
+    def fetch_data(self, dir_path="data/stock_info/", days=30, offset=0,
+        date = datetime.datetime.now()):
         o = datetime.timedelta(days=offset)
         d = datetime.timedelta(days=1)
         e = date - o
