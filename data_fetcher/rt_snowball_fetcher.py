@@ -45,7 +45,7 @@ class RtSnowballFetcher(object):
         tor_list = []
         for n in jdat['data']:
             chg = n['chg']
-            if chg == None:
+            if chg == None or n['volume'] == None:
                 continue
             t = int(n['timestamp'] / 1000)
             d = datetime.datetime.strftime(datetime.datetime.fromtimestamp(t), '%Y%m%d %H:%M:%S')
