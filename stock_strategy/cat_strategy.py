@@ -92,6 +92,8 @@ class CatStrategy(object):
         
 
     def buy_strategy(self):
+        if (self.realtime.shape[0] <= 0):
+            return False, "rt invalid"
         rt_date = self.realtime['trade_date'][0].split()[0]
         his_date = self.history['trade_date'][0]
         if  (rt_date == str(his_date)):

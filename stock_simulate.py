@@ -80,4 +80,4 @@ if __name__=="__main__":
       "topic" : "1",
       "template" : "html",
     }
-    requests.get(url = send_url, params = params)
+    #requests.get(url = send_url, params = params)
