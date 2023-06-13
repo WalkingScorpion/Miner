@@ -81,11 +81,13 @@ class CatStrategy(object):
         info = his['ts_code'][0]
         if his.shape[0] < period:
             return "Not Ready"
-        sell = his['high'][0]
-        i = 1
-        while i < his.shape[0]:
-            n = int(str(his['trade_date'][i]).split()[0])
-            if his['high'][i] > sell:
+        s = his.shape[0]
+        sell = his['high'][s - 1]
+        i = 0
+        while i < 2:
+            index = s - 1 - i
+            n = int(str(his['trade_date'][index]).split()[0])
+            if his['high'][index] > sell:
                 return " %s | %f | %f" % (n, sell, sell / price * 100 - 100)
             i += 1
         return "Failed"
