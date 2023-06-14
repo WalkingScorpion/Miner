@@ -15,6 +15,8 @@ if __name__=="__main__":
     date = sys.argv[1]
     print('---- Begin %s Trace ----' % date)
     with open('data/mock_trade/' + date) as f:
+        c = 0
+        sm = 0.0
         for line in f:
             line = line.strip()
             info = line.split('|')
@@ -25,7 +27,14 @@ if __name__=="__main__":
             rt.fetch_data()
             h = tuf.extract_snapshot(code)
             r = rt.extract_snapshot(code)
-            s = xs.XStrategy(h, r)
+            s = xs.XStrategy(h, r, 1.01)
             ret = s.sell_strategy(trade_time.split()[0], price)
             print('%s  --->  %s' % (line, ret))
+            sp = ret.split('|')
+            if len(sp) > 2:
+                profile = float(ret.split('|')[2])
+                if profile > -9:
+                    sm += profile
+                    c += 1
+        print(sm / c)
     print('---- All Done %s ----' % date)

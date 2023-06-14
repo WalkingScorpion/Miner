@@ -4,9 +4,10 @@ import pandas as pd
 
 
 class XStrategy(object):
-    def __init__(self, history, realtime):
+    def __init__(self, history, realtime, sell_base=1.005):
         self.history = history
         self.realtime = realtime
+        self.sb = sell_base
 
     def strategy_level0(self, his):
         td = his['trade_date'][0]
@@ -80,7 +81,7 @@ class XStrategy(object):
         his = his.drop(drop_list)
         info = his['ts_code'][0]
         s = his.shape[0]
-        base_coef = 1.007
+        base_coef = self.sb
         i = 0
         while i < period and 0 <= s - 1 - i:
             index = s - 1 - i
