@@ -5,6 +5,7 @@ import os
 from data_fetcher import rt_snowball_fetcher as rsf
 from data_fetcher import tushare_fetcher as tuf
 from stock_strategy import cat_strategy as cs
+from stock_strategy import x_strategy as xs
 import tushare as ts
 
 if __name__=="__main__":
@@ -24,7 +25,7 @@ if __name__=="__main__":
             rt.fetch_data()
             h = tuf.extract_snapshot(code)
             r = rt.extract_snapshot(code)
-            s = cs.CatStrategy(h, r)
+            s = xs.XStrategy(h, r)
             ret = s.sell_strategy(trade_time.split()[0], price)
             print('%s  --->  %s' % (line, ret))
     print('---- All Done %s ----' % date)

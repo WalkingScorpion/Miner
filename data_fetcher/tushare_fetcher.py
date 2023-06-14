@@ -11,8 +11,8 @@ class TushareFetcher(object):
         self.code_list = []
 
     def fetch_stock_info_by_tradedate(self, dir_path, td):
-        ts.set_token('d78d8913b060771bebe19279df50a929e5f6fc81a48c179bf02a8c88')
-        #ts.set_token('d2ff623db1a7255defc5b597a2b530c9d671505c49e5e49477cc9ccb')
+        #ts.set_token('d78d8913b060771bebe19279df50a929e5f6fc81a48c179bf02a8c88')
+        ts.set_token('d2ff623db1a7255defc5b597a2b530c9d671505c49e5e49477cc9ccb')
         pro = ts.pro_api()
         f = dir_path + "/" + td + ".json"
         if os.access(f, os.F_OK):
@@ -40,8 +40,11 @@ class TushareFetcher(object):
         i = 0
         sl = []
         while (i < days):
+            wd = e.weekday()
             td = e.strftime("%Y%m%d")
             e = e - d
+            if wd == 5 or wd == 6:
+                continue
             r = self.fetch_stock_info_by_tradedate(dir_path, td)
             if r.shape[0] <= 0:
                 continue
