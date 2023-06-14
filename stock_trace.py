@@ -27,7 +27,7 @@ if __name__=="__main__":
             rt.fetch_data()
             h = tuf.extract_snapshot(code)
             r = rt.extract_snapshot(code)
-            s = xs.XStrategy(h, r, 1.01)
+            s = xs.XStrategy(h, r, 1.008)
             ret = s.sell_strategy(trade_time.split()[0], price)
             print('%s  --->  %s' % (line, ret))
             sp = ret.split('|')
