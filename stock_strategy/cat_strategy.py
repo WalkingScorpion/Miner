@@ -8,6 +8,18 @@ class CatStrategy(object):
         self.history = history
         self.realtime = realtime
 
+    def fill_df(self, rdf, row, sell, td, td_gap):
+        price = rdf['buy'][row]
+        profile = sell / price * 100 - 100
+        rdf.loc[row, 'sell_date'] = str(td)
+        rdf.loc[row, 'sell'] = sell
+        rdf.loc[row, 'profile'] = profile
+        rdf.loc[row, 'potd'] = profile / (td_gap + 1)
+        b = datetime.strptime(rdf['buy_date'][row].split()[0], '%Y%m%d')
+        s = datetime.strptime(rdf['sell_date'][row].split()[0], '%Y%m%d')
+        rdf.loc[row, 'pond'] = profile / (s - b).days
+        return profile
+
     def strategy_level0(self, his, rdf):
         td = his['trade_date'][0]
         op = his['open'][0]
@@ -64,7 +76,7 @@ class CatStrategy(object):
         vr = stock_utils.get_volume_ratio(his)
         return vr > 1
 
-    def sell_strategy(self, code, buy_date, price, period=3, rdf=None):
+    def sell_strategy(self, row, rdf, period=3):
         rt_date = self.realtime['trade_date'][0].split()[0]
         his_date = self.history['trade_date'][0]
         if  (rt_date == str(his_date)):
@@ -74,7 +86,7 @@ class CatStrategy(object):
         drop_list = []
         while i < his.shape[0]:
             n = int(str(his['trade_date'][i]).split()[0])
-            b = int(buy_date)
+            b = int(rdf['buy_date'][row].split()[0])
             if n <= b:
                 drop_list.append(i)
             i += 1
@@ -84,22 +96,13 @@ class CatStrategy(object):
             return "Not Ready"
         s = his.shape[0]
         sell = his['high'][s - 1]
-        i = 0
-        while i < 2:
+        i = 1
+        while i < period - 1:
             index = s - 1 - i
             n = int(str(his['trade_date'][index]).split()[0])
             if his['high'][index] > sell:
-                profile =  sell / price * 100 - 100
+                profile = self.fill_df(rdf, row, sell, n, i)
                 return " %s | %f | %f" % (n, sell, profile)
-                if rdf is not None:
-                    p = [rdf[rdf.ts_code == code].index.tolist()[0]]
-                    rdf.loc[p, 'sell_date'] = str(n)
-                    rdf.loc[p, 'sell'] = sell
-                    rdf.loc[p, 'profile'] = profile
-                    rdf.loc[p, 'potd'] = profile / (i + 1)
-                    b = datetime.strptime(rdf['buy_date'][p[0]].split()[0], '%Y%m%d')
-                    s = datetime.strptime(rdf['sell_date'][p[0]].split()[0], '%Y%m%d')
-                    rdf.loc[p, 'pond'] = profile / (s - b).days
             i += 1
         return "Failed"
         

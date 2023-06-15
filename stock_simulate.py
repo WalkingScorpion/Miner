@@ -36,10 +36,10 @@ def handle(start, end, code_list, tuf, f_info_l, rdf):
     sink = datetime.datetime.now()
     gap = (sink - begin).seconds 
 
-if __name__=="__main__":
-    tuf = tuf.TushareFetcher()
-    tuf.fetch_data(offset=1,days=30)
-    df_his = tuf.dfl
+def stock_simulate():
+    tufo = tuf.TushareFetcher()
+    tufo.fetch_data(offset=1,days=30)
+    df_his = tufo.dfl
     rt = rsf.RtSnowballFetcher('601168.SH')
     rt.fetch_data()
     date = rt.df['trade_date'][0].split()[0]
@@ -47,7 +47,7 @@ if __name__=="__main__":
         st = sys.argv[1]
         code_list = st.split(",")
     else:
-        code_list = tuf.code_list
+        code_list = tufo.code_list
     #while
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- Begin %s ----' % stp
@@ -64,7 +64,7 @@ if __name__=="__main__":
     while i < len(code_list):
         start = i
         end = i + batch if i + batch < len(code_list) else  len(code_list)
-        handle(start, end, code_list, tuf, f_info_l, rdf)
+        handle(start, end, code_list, tufo, f_info_l, rdf)
         i = i + batch
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- All Done %s ----' % stp
@@ -84,3 +84,7 @@ if __name__=="__main__":
       "template" : "html",
     }
     requests.get(url = send_url, params = params)
+    
+
+if __name__=="__main__":
+    stock_simulate()

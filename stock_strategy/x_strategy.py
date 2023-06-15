@@ -9,7 +9,8 @@ class XStrategy(CatStrategy):
         CatStrategy.__init__(self, history, realtime)
         self.sb = sell_base
 
-    def sell_strategy(self, code, buy_date, price, period=3, rdf=None):
+
+    def sell_strategy(self, row, rdf, period=3):
         rt_date = self.realtime['trade_date'][0].split()[0]
         his_date = self.history['trade_date'][0]
         if  (rt_date == str(his_date)):
@@ -17,9 +18,9 @@ class XStrategy(CatStrategy):
         his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
         i = 0
         drop_list = []
+        b = int(rdf['buy_date'][row].split()[0])
         while i < his.shape[0]:
             n = int(str(his['trade_date'][i]).split()[0])
-            b = int(buy_date)
             if n <= b:
                 drop_list.append(i)
             i += 1
@@ -27,6 +28,7 @@ class XStrategy(CatStrategy):
         info = his['ts_code'][0]
         s = his.shape[0]
         base_coef = self.sb / 100
+        price = rdf['buy'][row]
         i = 0
         while i < period and 0 <= s - 1 - i:
             index = s - 1 - i
@@ -34,32 +36,14 @@ class XStrategy(CatStrategy):
             #sell = (1 + base_coef * (i + 1)) * price
             sell = (1 + base_coef) * price
             if his['high'][index] > sell:
-                profile = sell / price * 100 - 100
-                if rdf is not None:
-                    p = [rdf[rdf.ts_code == code].index.tolist()[0]]
-                    rdf.loc[p, 'sell_date'] = str(n)
-                    rdf.loc[p, 'sell'] = sell
-                    rdf.loc[p, 'profile'] = profile
-                    rdf.loc[p, 'potd'] = profile / (i + 1)
-                    b = datetime.strptime(rdf['buy_date'][p[0]].split()[0], '%Y%m%d')
-                    s = datetime.strptime(rdf['sell_date'][p[0]].split()[0], '%Y%m%d')
-                    rdf.loc[p, 'pond'] = profile / (s - b).days
+                profile = self.fill_df(rdf, row, sell, n, i)
                 return " %d | %f | %f" % (n, sell, profile)
             i += 1
         if his.shape[0] < period:
             return "Not Ready"
         else:
             sell = his['close'][index]
-            profile = sell / price * 100 - 100
-            if rdf is not None:
-                p = [rdf[rdf.ts_code == code].index.tolist()[0]]
-                rdf.loc[p, 'sell_date'] = str(n)
-                rdf.loc[p, 'sell'] = sell
-                rdf.loc[p, 'profile'] = profile
-                rdf.loc[p, 'potd'] = profile / (i + 1)
-                b = datetime.strptime(rdf['buy_date'][p[0]].split()[0], '%Y%m%d')
-                s = datetime.strptime(rdf['sell_date'][p[0]].split()[0], '%Y%m%d')
-                rdf.loc[p, 'pond'] = profile / (s - b).days
-            return " %d | %f | %f" % (n, sell, sell / price * 100 - 100)
+            profile = self.fill_df(rdf, row, sell, n, period)
+            return " %d | %f | %f" % (n, sell, profile)
         
 
