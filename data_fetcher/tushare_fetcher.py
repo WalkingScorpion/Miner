@@ -14,14 +14,14 @@ class TushareFetcher(object):
         #ts.set_token('d78d8913b060771bebe19279df50a929e5f6fc81a48c179bf02a8c88')
         ts.set_token('d2ff623db1a7255defc5b597a2b530c9d671505c49e5e49477cc9ccb')
         pro = ts.pro_api()
-        f = dir_path + "/" + td + ".json"
+        f = dir_path + "/" + td + ".csv"
         if os.access(f, os.F_OK):
-            r = pd.read_json(f)
+            r = pd.read_csv(f)
             if r.shape[0] > 0:
                 return r
         r = pro.daily(trade_date=td, adj='qfq')
         if r.shape[0] > 0:
-            r.to_json(dir_path + "/" + td + ".json")
+            r.to_csv(dir_path + "/" + td + ".csv")
         return r
 
     def extract_snapshot(self, code):

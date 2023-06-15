@@ -37,7 +37,7 @@ def handle(start, end, code_list, tuf, f_info_l):
 
 if __name__=="__main__":
     tuf = tuf.TushareFetcher()
-    tuf.fetch_data(offset=1)
+    tuf.fetch_data(offset=1,days=30)
     df_his = tuf.dfl
     rt = rsf.RtSnowballFetcher('601168.SH')
     rt.fetch_data()
