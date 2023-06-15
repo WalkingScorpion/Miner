@@ -8,7 +8,7 @@ class CatStrategy(object):
         self.history = history
         self.realtime = realtime
 
-    def strategy_level0(self, his):
+    def strategy_level0(self, his, rdf):
         td = his['trade_date'][0]
         op = his['open'][0]
         cl = his['close'][0]
@@ -47,6 +47,7 @@ class CatStrategy(object):
             his['vol'][2] < his['vol'][3]):
             return False, "[Volume not continue increase]"
         info = '| %s | %lf |' % (td, cl)
+        rdf.loc[len(rdf.index)] = [his['ts_code'][0], td, cl, "", "", 0.0, 0.0, 0.0, 0.0]
         return True, info
         
     def strategy_tor(self, his):
@@ -63,7 +64,7 @@ class CatStrategy(object):
         vr = stock_utils.get_volume_ratio(his)
         return vr > 1
 
-    def sell_strategy(self, buy_date, price, period=3):
+    def sell_strategy(self, code, buy_date, price, period=3, rdf=None):
         rt_date = self.realtime['trade_date'][0].split()[0]
         his_date = self.history['trade_date'][0]
         if  (rt_date == str(his_date)):
@@ -88,12 +89,22 @@ class CatStrategy(object):
             index = s - 1 - i
             n = int(str(his['trade_date'][index]).split()[0])
             if his['high'][index] > sell:
-                return " %s | %f | %f" % (n, sell, sell / price * 100 - 100)
+                profile =  sell / price * 100 - 100
+                return " %s | %f | %f" % (n, sell, profile)
+                if rdf is not None:
+                    p = [rdf[rdf.ts_code == code].index.tolist()[0]]
+                    rdf.loc[p, 'sell_date'] = str(n)
+                    rdf.loc[p, 'sell'] = sell
+                    rdf.loc[p, 'profile'] = profile
+                    rdf.loc[p, 'potd'] = profile / (i + 1)
+                    b = datetime.strptime(rdf['buy_date'][p[0]].split()[0], '%Y%m%d')
+                    s = datetime.strptime(rdf['sell_date'][p[0]].split()[0], '%Y%m%d')
+                    rdf.loc[p, 'pond'] = profile / (s - b).days
             i += 1
         return "Failed"
         
 
-    def buy_strategy(self):
+    def buy_strategy(self, rdf):
         if (self.realtime.shape[0] <= 0):
             return False, "rt invalid"
         rt_date = self.realtime['trade_date'][0].split()[0]
@@ -101,12 +112,15 @@ class CatStrategy(object):
         if  (rt_date == str(his_date)):
             self.history = self.history.drop([0])
         his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
-        match_level0, info0 = self.strategy_level0(his)
+        match_level0, info0 = self.strategy_level0(his, rdf)
         if match_level0:
             if self.strategy_tor(his):
+                rdf.loc[rdf.shape[0] - 1, 'tags'] += " [tor]"
                 info0 += " [tor]"
             if self.strategy_evol(his):
+                rdf.loc[rdf.shape[0] - 1, 'tags'] += " [evol]"
                 info0 += " [evol]"
             if self.strategy_vr(his):
+                rdf.loc[rdf.shape[0] - 1, 'tags'] += " [vr]"
                 info0 += " [vr]"
         return match_level0, info0

@@ -7,11 +7,12 @@ from data_fetcher import rt_snowball_fetcher as rsf
 from data_fetcher import tushare_fetcher as tuf
 from stock_strategy import cat_strategy as cs
 import tushare as ts
+from utils import stock_utils
 
 show_url = "http://stockpage.10jqka.com.cn/"
 send_url = "http://www.pushplus.plus/send"
 
-def handle(start, end, code_list, tuf, f_info_l):
+def handle(start, end, code_list, tuf, f_info_l, rdf):
     local = code_list[start : end]
     begin = datetime.datetime.now()
     stp = begin.strftime("%Y-%m-%d %H:%M:%S")
@@ -23,7 +24,7 @@ def handle(start, end, code_list, tuf, f_info_l):
         h = tuf.extract_snapshot(c)
         r = rt.extract_snapshot(c)
         s = cs.CatStrategy(h, r)
-        mark, reason = s.buy_strategy()
+        mark, reason = s.buy_strategy(rdf)
         if mark:
             tmp = "<a href=\"" + show_url + c.split('.')[0] + "\">" + \
                 c + "</a> " + reason + ' <br>'
@@ -59,10 +60,11 @@ if __name__=="__main__":
     f_info_l[1] += tmp + '<br>'
     i = 0
     batch = 150
+    rdf = stock_utils.new_trace_df()
     while i < len(code_list):
         start = i
         end = i + batch if i + batch < len(code_list) else  len(code_list)
-        handle(start, end, code_list, tuf, f_info_l)
+        handle(start, end, code_list, tuf, f_info_l, rdf)
         i = i + batch
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- All Done %s ----' % stp
@@ -73,6 +75,7 @@ if __name__=="__main__":
         f.write(f_info_l[0])
     with open('data/mock_trade/' + date, 'w+') as f:
         f.write(f_info_l[2])
+    rdf.to_csv('data/mock_trade/' + date + ".csv")
     params = {
       "token" : "b0b164534ed046bcbd0719fa93954d54",
       "title" : "“猫周期”量化 选股推送",

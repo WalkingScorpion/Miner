@@ -6,6 +6,9 @@ import time
 import os
 import pandas as pd
 
+def new_trace_df():
+    rdf = pd.DataFrame(columns=['ts_code','buy_date', 'buy', 'tags', 'sell_date', 'sell', 'profile', 'potd', 'pond'])
+    return rdf
 
 def get_k(df, k, offset = 0):
     return df['close'][offset : offset + k].mean()
