@@ -7,6 +7,13 @@ class CatStrategy(object):
     def __init__(self, history, realtime):
         self.history = history
         self.realtime = realtime
+        self.his = history
+        if self.realtime is not None:
+            rt_date = self.realtime['trade_date'][0].split()[0]
+            his_date = self.history['trade_date'][0]
+            if  (rt_date == str(his_date)):
+                self.history.drop([0], inplace=True)
+            self.his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
 
     def fill_df(self, rdf, row, sell, td, td_gap):
         price = rdf['buy'][row]
@@ -15,8 +22,8 @@ class CatStrategy(object):
         rdf.loc[row, 'sell'] = sell
         rdf.loc[row, 'profile'] = profile
         rdf.loc[row, 'potd'] = profile / (td_gap + 1)
-        b = datetime.strptime(rdf['buy_date'][row].split()[0], '%Y%m%d')
-        s = datetime.strptime(rdf['sell_date'][row].split()[0], '%Y%m%d')
+        b = datetime.strptime(str(rdf['buy_date'][row]).split()[0], '%Y%m%d')
+        s = datetime.strptime(str(rdf['sell_date'][row]).split()[0], '%Y%m%d')
         rdf.loc[row, 'pond'] = profile / (s - b).days
         return profile
 
@@ -59,29 +66,33 @@ class CatStrategy(object):
             his['vol'][2] < his['vol'][3]):
             return False, "[Volume not continue increase]"
         info = '| %s | %lf |' % (td, cl)
-        rdf.loc[len(rdf.index)] = [his['ts_code'][0], td, cl, "", "", 0.0, 0.0, 0.0, 0.0]
+        rdf.loc[len(rdf.index)] = [his['ts_code'][0], td, cl, "", 0, "", 0.0, 0.0, 0.0, 0.0]
         return True, info
         
     def strategy_tor(self, his):
-        tor = his['tor'][0]
-        return 5 < tor < 10
+        if 'tor' in his:
+            tor = his['tor'][0]
+            return 5 < tor < 10
+        else:
+            return False
 
     def strategy_evol(self, his):
-        ts = his['trade_date'][0].split()[1]
-        sec = stock_utils.get_trade_second(ts)
-        e_vol = 1.0 * his['vol'][0]  / sec * 3600 * 4
-        return e_vol > his['vol'][1]
+        tsl = str(his['trade_date'][0]).split()
+        if len(tsl) > 1:
+            ts = tsl[1]
+            sec = stock_utils.get_trade_second(ts)
+            e_vol = 1.0 * his['vol'][0]  / sec * 3600 * 4
+            return e_vol > his['vol'][1]
+        else:
+            return his['vol'][0] > his['vol'][1]
+
 
     def strategy_vr(self, his):
         vr = stock_utils.get_volume_ratio(his)
         return vr > 1
 
     def sell_strategy(self, row, rdf, period=3):
-        rt_date = self.realtime['trade_date'][0].split()[0]
-        his_date = self.history['trade_date'][0]
-        if  (rt_date == str(his_date)):
-            self.history = self.history.drop([0])
-        his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
+        his = self.his
         i = 0
         drop_list = []
         while i < his.shape[0]:
@@ -90,7 +101,8 @@ class CatStrategy(object):
             if n <= b:
                 drop_list.append(i)
             i += 1
-        his = his.drop(drop_list)
+        his.drop(drop_list)
+        his.reset_index(drop=True, inplace=True)
         info = his['ts_code'][0]
         if his.shape[0] < period:
             return "Not Ready"
@@ -108,13 +120,7 @@ class CatStrategy(object):
         
 
     def buy_strategy(self, rdf):
-        if (self.realtime.shape[0] <= 0):
-            return False, "rt invalid"
-        rt_date = self.realtime['trade_date'][0].split()[0]
-        his_date = self.history['trade_date'][0]
-        if  (rt_date == str(his_date)):
-            self.history = self.history.drop([0])
-        his = pd.concat([self.realtime, self.history]).reset_index(drop=True)
+        his = self.his
         match_level0, info0 = self.strategy_level0(his, rdf)
         if match_level0:
             if self.strategy_tor(his):

@@ -63,6 +63,6 @@ class TushareFetcher(object):
         self.code_list = list(rs)
 
 if __name__=="__main__":
-    f = TushareFetcher(sys.argv[1])
-    df = f.fetch_data()
-    print (df)
+    f = TushareFetcher()
+    df = f.fetch_data(date = datetime.datetime.strptime("20230614", "%Y%m%d"))
+    print(pd.concat(f.dfl)['trade_date'])

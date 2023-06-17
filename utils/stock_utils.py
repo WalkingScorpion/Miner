@@ -7,7 +7,7 @@ import os
 import pandas as pd
 
 def new_trace_df():
-    rdf = pd.DataFrame(columns=['ts_code','buy_date', 'buy', 'tags', 'sell_date', 'sell', 'profile', 'potd', 'pond'])
+    rdf = pd.DataFrame(columns=['ts_code','buy_date', 'buy', 'tags', 'vol', 'sell_date', 'sell', 'profile', 'potd', 'pond'])
     return rdf
 
 def get_k(df, k, offset = 0):
@@ -38,15 +38,19 @@ def get_trade_second(ts):
     return int(g.total_seconds())
 
 def get_volume_ratio(df, window = 5):
-    ts = df['trade_date'][0].split()[1]
-    evol = df['vol'][0] / get_trade_second(ts)
-    i = 0
-    s = 0
-    while (i < window):
-        s += df['vol'][i + 1]
-        i += 1
-    mvol = s / window / 14400
-    return evol / mvol
+    tsl = str(df['trade_date'][0]).split()
+    if len(tsl) > 1:
+      ts = tsl[1]
+      evol = df['vol'][0] / get_trade_second(ts)
+      i = 0
+      s = 0
+      while (i < window):
+          s += df['vol'][i + 1]
+          i += 1
+      mvol = s / window / 14400
+      return evol / mvol
+    else:
+        return df['vol'][0] / window / 14400
 
 if __name__=="__main__":
     print(get_trade_second("09:20:30"), 0)
