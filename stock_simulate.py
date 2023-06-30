@@ -16,8 +16,6 @@ send_url = "http://www.pushplus.plus/send"
 
 def realtime_handle(start, end, code_list, tuf, f_info_l, rdf):
     local = code_list[start : end]
-    begin = datetime.datetime.now()
-    stp = begin.strftime("%Y-%m-%d %H:%M:%S")
     code = ','.join(local)
     rt = rsf.RtSnowballFetcher(code)
     rt.fetch_data()
@@ -35,10 +33,8 @@ def realtime_handle(start, end, code_list, tuf, f_info_l, rdf):
             tmp = c + " " + reason
             print(tmp)
             f_info_l[2] += tmp + '\n'
-    sink = datetime.datetime.now()
-    gap = (sink - begin).seconds 
 
-def stock_history_simulate(check_date, days=60, input_code=""):
+def stock_history_simulate(check_date, days=60, input_code="", up=2.0, low=5.0):
     ExtraNum = 30
     tufo = tuf.TushareFetcher()
     tufo.fetch_data(date=datetime.datetime.strptime(check_date, "%Y%m%d"), offset=0, days=days + ExtraNum)
@@ -74,18 +70,20 @@ def stock_history_simulate(check_date, days=60, input_code=""):
         while j < rdf.shape[0]:
             code = rdf['ts_code'][j]
             h = tufo.extract_snapshot(code)
-            s = xs.XStrategy(h[h['trade_date'] <= date].reset_index(drop=True), None, 2, 1)
-            s.sell_strategy(j, rdf, period=3)
+            s = xs.XStrategy(h[h['trade_date'] <= date].reset_index(drop=True), None, up, low)
+            s.sell_strategy(j, rdf, period=1)
             if len(str(rdf['sell_date'][j])) > 0:
                 sd = rdf['sell_date'][j]
-                high = h[h['trade_date'] == int(sd)].reset_index(drop=True).loc[0, 'high']
+                tmp = h[h['trade_date'] == int(sd)].reset_index(drop=True)
+                high = tmp['high'][0]
+                close = tmp['close'][0]
                 vol = rdf['vol'][j]
                 price = rdf['sell'][j]
                 amount = price * vol * 100
                 profile = amount - rdf['vol'][j] * 100 * rdf['buy'][j]
                 account += amount
                 drop_list.append(j)
-                print('%d: sell %s, price %lf, vol %d, amount %lf, profile %lf, high %lf' % (date, code, price, vol, amount, profile, high))
+                print('%d: sell %s, price %lf, vol %d, amount %lf, profile %lf, high %lf, close %lf' % (date, code, price, vol, amount, profile, high, close))
             j += 1
         rdf.drop(drop_list, inplace=True)
         rdf.reset_index(drop=True, inplace=True)
@@ -192,6 +190,6 @@ def stock_realtime_simulate():
 if __name__=="__main__":
     stock_realtime_simulate()
     #if len(sys.argv) > 1:
-    #    stock_history_simulate("20230615", 3, sys.argv[1])
+    #    stock_history_simulate("20230616", 30, up=float(sys.argv[1]), low=1.0)
     #else:
-    #    stock_history_simulate("20230615", 30)
+    #    stock_history_simulate("20230616", 750, up=2.5, low=1)

@@ -33,7 +33,7 @@ class XStrategy(CatStrategy):
             index = s - 1 - i
             n = int(str(his['trade_date'][index]).split()[0])
             #sell = (1 + base_coef * (i + 1)) * price
-            sell = (1 + base_coef - 0.5 / 100) * price
+            sell = (1 + base_coef) * price
             if his['high'][index] > sell:
                 profile = self.fill_df(rdf, row, sell, n, i)
                 return " %d | %f | %f" % (n, sell, profile)
