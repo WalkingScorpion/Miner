@@ -8,6 +8,7 @@ import pandas as pd
 class TushareFetcher(object):
     def __init__(self):
         self.dfl = []
+        self.df = None
         self.code_list = []
 
     def fetch_stock_info_by_tradedate(self, dir_path, td):
@@ -26,10 +27,7 @@ class TushareFetcher(object):
 
     def extract_snapshot(self, code):
         l = []
-        for df in self.dfl:
-            r = df[df.ts_code == code]
-            l.append(r)
-        r = pd.concat(l).reset_index(drop=True)
+        r = self.df[self.df.ts_code == code].reset_index(drop=True)
         return r
 
     def fetch_data(self, dir_path="data/stock_info/", days=30, offset=0,
@@ -54,6 +52,7 @@ class TushareFetcher(object):
                 code_set.add(c)
             sl.append(code_set)
             i = i + 1
+        self.df = pd.concat(self.dfl)
         rs = set()
         for cs in sl:
             if len(rs) == 0:
