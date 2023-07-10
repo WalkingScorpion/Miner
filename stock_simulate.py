@@ -15,6 +15,7 @@ show_url = "http://stockpage.10jqka.com.cn/"
 send_url = "http://www.pushplus.plus/send"
 
 def realtime_handle(start, end, code_list, tuf, f_info_l, rdf):
+    invalid = 0
     local = code_list[start : end]
     code = ','.join(local)
     rt = rsf.RtSnowballFetcher(code)
@@ -23,6 +24,9 @@ def realtime_handle(start, end, code_list, tuf, f_info_l, rdf):
     for c in local:
         h = tuf.extract_snapshot(c)
         r = rt.extract_snapshot(c)
+        if r.shape[0] <= 0:
+            invalid += 1
+            continue
         s = cs.CatStrategy(h, r)
         mark, reason = s.buy_strategy(rdf)
         if mark:
@@ -33,6 +37,7 @@ def realtime_handle(start, end, code_list, tuf, f_info_l, rdf):
             tmp = c + " " + reason
             print(tmp)
             f_info_l[2] += tmp + '\n'
+    return invalid
 
 def stock_history_simulate(check_date, days=60, input_code="", up=2.0, low=5.0):
     ExtraNum = 30
@@ -162,13 +167,14 @@ def stock_realtime_simulate():
     i = 0
     batch = 150
     rdf = stock_utils.new_trace_df()
+    invalid = 0
     while i < len(code_list):
         start = i
         end = i + batch if i + batch < len(code_list) else  len(code_list)
-        realtime_handle(start, end, code_list, tufo, f_info_l, rdf)
+        invalid += realtime_handle(start, end, code_list, tufo, f_info_l, rdf)
         i = i + batch
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    tmp = '---- All Done %s ----' % stp
+    tmp = '---- All Done %s with %d invalid ----' % (stp, invalid)
     print(tmp)
     f_info_l[0] += tmp + '<br>\n'
     f_info_l[1] += tmp + '<br>'
