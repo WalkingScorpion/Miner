@@ -106,11 +106,7 @@ def stock_history_simulate(check_date, days=60, input_code="", up=2.0, low=5.0):
             s = xs.XStrategy(h, None)
             mark, reason = s.buy_strategy(rdf)
             if mark:
-                if not 'evol' in rdf['tags'][rdf.shape[0] - 1]:
-                    rdf.drop([rdf.shape[0] - 1], inplace=True)
-                    rdf.reset_index(drop=True, inplace=True)
-                else:
-                    buy_num += 1
+                buy_num += 1
 
         drop_list = []
         while buy_num > 0:
@@ -204,4 +200,4 @@ if __name__=="__main__":
     #if len(sys.argv) > 1:
     #    stock_history_simulate("20230616", 30, up=float(sys.argv[1]), low=1.0)
     #else:
-    #    stock_history_simulate("20230616", 750, up=2.5, low=1)
+    #    stock_history_simulate("20230711", 60, up=3, low=1)
