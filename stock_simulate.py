@@ -14,7 +14,7 @@ from utils import stock_utils
 show_url = "http://stockpage.10jqka.com.cn/"
 send_url = "http://www.pushplus.plus/send"
 
-def realtime_handle(start, end, code_list, tuf, f_info_l, rdf):
+def realtime_handle(start, end, code_list, tuf, f_info_l, rdf, strategy='cat'):
     invalid = 0
     local = code_list[start : end]
     code = ','.join(local)
@@ -27,7 +27,10 @@ def realtime_handle(start, end, code_list, tuf, f_info_l, rdf):
         if r.shape[0] <= 0:
             invalid += 1
             continue
-        s = cs.CatStrategy(h, r)
+        if strategy == 'cat':
+            s = cs.CatStrategy(h, r)
+        else:
+            s = xs.XStrategy(h, r)
         mark, reason = s.buy_strategy(rdf)
         if mark:
             tmp = "<a href=\"" + show_url + c.split('.')[0] + "\">" + \
@@ -149,11 +152,14 @@ def stock_realtime_simulate():
     rt = rsf.RtSnowballFetcher('601168.SH')
     rt.fetch_data()
     date = rt.df['trade_date'][0].split()[0]
-    if (len(sys.argv) > 1):
+    strategy = 'cat'
+    code_list = tufo.code_list
+    if len(sys.argv) > 1:
         st = sys.argv[1]
-        code_list = st.split(",")
-    else:
-        code_list = tufo.code_list
+        if st.startswith('strategy='):
+            strategy = st.split('=')[1]
+        else: 
+            code_list = st.split(",")
     #while
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- Begin %s ----' % stp
@@ -171,7 +177,7 @@ def stock_realtime_simulate():
     while i < len(code_list):
         start = i
         end = i + batch if i + batch < len(code_list) else  len(code_list)
-        invalid += realtime_handle(start, end, code_list, tufo, f_info_l, rdf)
+        invalid += realtime_handle(start, end, code_list, tufo, f_info_l, rdf, strategy=strategy)
         i = i + batch
     stp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     tmp = '---- All Done %s with %d invalid ----' % (stp, invalid)
