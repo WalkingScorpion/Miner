@@ -57,13 +57,15 @@ class CatStrategy(object):
             return False, "[open price vs k5 gap more than 0.015. open %lf k5 %lf]" % (op, k5[0])
         if k5[0] < k5[1] or k10[0] < k10[1] or k20[0] < k20[1]:
             return False, "[Kx decline. k5 %lf->%lf k10 %lf->%lf k20 %lf->%lf]" % (k5[1], k5[0], k10[1], k10[0], k20[1], k20[0])
-        if box_pct < 0.025 or box_pct > 0.055:
+        if box_pct < 0.015 or box_pct > 0.045:
             return False, "[box profile unexcepted. box percentt %lf]" % box_pct
         if (hi - op) / op > 0.096:
             return False, "[Highest price is too high. highest %lf open %lf]" % (hi, op)
         if (
-            his['vol'][1] < his['vol'][2] or
-            his['vol'][2] < his['vol'][3]):
+            (not self.strategy_evol(his)) or
+            his['vol'][1] < his['vol'][3] or
+            his['vol'][2] > his['vol'][3] or
+            his['vol'][1] < his['vol'][2]):
             return False, "[Volume not continue increase]"
         info = '| %s | %lf |' % (td, cl)
         rdf.loc[len(rdf.index)] = [his['ts_code'][0], td, cl, "", 0, "", 0.0, 0.0, 0.0, 0.0]
@@ -126,9 +128,6 @@ class CatStrategy(object):
             if self.strategy_tor(his):
                 rdf.loc[rdf.shape[0] - 1, 'tags'] += " [tor]"
                 info0 += " [tor]"
-            if self.strategy_evol(his):
-                rdf.loc[rdf.shape[0] - 1, 'tags'] += " [evol]"
-                info0 += " [evol]"
             if self.strategy_vr(his):
                 rdf.loc[rdf.shape[0] - 1, 'tags'] += " [vr]"
                 info0 += " [vr]"
