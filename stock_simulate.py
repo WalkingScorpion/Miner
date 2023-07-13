@@ -208,4 +208,4 @@ if __name__=="__main__":
     #if len(sys.argv) > 1:
     #    stock_history_simulate("20230616", 30, up=float(sys.argv[1]), low=1.0)
     #else:
-    #    stock_history_simulate("20230711", 60, up=4.5, low=2)
+    #    stock_history_simulate("20230711", 60, up=3, low=1.5)
