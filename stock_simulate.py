@@ -88,10 +88,17 @@ def stock_history_simulate(check_date, days=60, input_code="", up=2.0, low=5.0):
                 vol = rdf['vol'][j]
                 price = rdf['sell'][j]
                 amount = price * vol * 100
-                profile = amount - rdf['vol'][j] * 100 * rdf['buy'][j]
-                account += amount
+                fee = max(amount * 2.5 / 10000, 5.0) + amount *(1.0 / 1000 + 1.0 / 100000)
+                profile = amount - rdf['vol'][j] * 100 * rdf['buy'][j] - fee
+                waste = (high - price) * rdf['vol'][j] * 100
+                upbound = (high - rdf['buy'][j]) / rdf['buy'][j]
+                account += amount - fee
                 drop_list.append(j)
-                print('%d: sell %s, price %lf, vol %d, amount %lf, profile %lf, high %lf, close %lf' % (date, code, price, vol, amount, profile, high, close))
+                print('%d: sell %s, price %lf, vol %d, amount %lf, profile %lf, fee %lf,' % (date, code, price, vol, amount, profile, fee), end=' ')
+                buf = ''
+                if profile > 0:
+                     buf = 'high %lf, waste %lf, upbound %lf' % (high, waste, upbound)
+                print(buf)
             j += 1
         rdf.drop(drop_list, inplace=True)
         rdf.reset_index(drop=True, inplace=True)
@@ -118,8 +125,9 @@ def stock_history_simulate(check_date, days=60, input_code="", up=2.0, low=5.0):
             if vol > 0:
                 rdf.loc[index, 'vol'] = vol
                 amount = price * vol * 100
-                account -= amount
-                print('%d: buy %s, price %lf, vol %d, amount %lf' % (date, code, price, vol, amount))
+                fee = max(amount * 2.5 / 10000, 5.0)
+                account -= amount + fee
+                print('%d: buy %s, price %lf, vol %d, amount %lf, fee %lf' % (date, code, price, vol, amount, fee))
             else:
                 drop_list.append(index)
             buy_num -= 1
@@ -200,4 +208,4 @@ if __name__=="__main__":
     #if len(sys.argv) > 1:
     #    stock_history_simulate("20230616", 30, up=float(sys.argv[1]), low=1.0)
     #else:
-    #    stock_history_simulate("20230711", 60, up=3, low=1)
+    #    stock_history_simulate("20230711", 60, up=4.5, low=2)

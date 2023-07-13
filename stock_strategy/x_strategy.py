@@ -117,7 +117,7 @@ class XStrategy(CatStrategy):
                 profile = self.fill_df(rdf, row, sell, n, i)
                 return " %d | %f | %f" % (n, sell, profile)
             if his['low'][index] < price * (1 - lr):
-                sell = price * (1 - lr)
+                sell = min(price * (1 - lr), his['high'][index])
                 profile = self.fill_df(rdf, row, sell, n, i)
                 return " %d | %f | %f" % (n, sell, profile)
             i += 1

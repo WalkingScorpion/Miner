@@ -26,8 +26,8 @@ class TushareFetcher(object):
         return r
 
     def extract_snapshot(self, code):
-        l = []
-        r = self.df[self.df.ts_code == code].reset_index(drop=True)
+        r = self.df.loc[code, :].reset_index(drop=True)
+        #r = self.df[self.df.ts_code == code].reset_index(drop=True)
         return r
 
     def fetch_data(self, dir_path="data/stock_info/", days=30, offset=0,
@@ -52,7 +52,7 @@ class TushareFetcher(object):
                 code_set.add(c)
             sl.append(code_set)
             i = i + 1
-        self.df = pd.concat(self.dfl)
+        self.df = pd.concat(self.dfl).set_index('ts_code', drop=False)
         rs = set()
         for cs in sl:
             if len(rs) == 0:
